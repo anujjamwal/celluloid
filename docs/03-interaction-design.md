@@ -97,27 +97,42 @@ underneath for early readers.
 
 ## Grammar enforced by shape
 
-- Statement blocks are 4×4 studs (32 × 32 mm) with a male tab on the bottom
-  and a female notch on top. They only stack vertically.
-- START has a rounded top (no notch), so nothing can go above it.
-- Parameter tiles are 2×4 studs with a dovetail that only fits the socket on
-  the **right** edge of a statement block. A block without a socket cannot
-  take a parameter; a block with a socket shows an engraved outline so an empty
-  one is visible.
-- REPEAT and IF are 4×4 blocks plus an **L-bracket bar** that extends down
-  their right side. The bar is printed in lengths for 1 to 5 inner blocks (like
-  LEGO plates). Inner blocks snap into the column right of the bar. The bar
-  ends in a foot that says "end" visually and gives the camera a closing mark.
-- Everything has anti-studs underneath so it holds to a baseplate and studs on
-  top so LEGO decorations can be added.
+![One block, top view and cross-section](images/block-anatomy.svg)
+
+- Statement blocks are 4×4 studs (32 × 32 mm, 9.6 mm tall) with a notch on
+  top and a matching tab underneath, offset to the left as in Scratch. They
+  only stack vertically, one way up.
+- The top face is flat like a LEGO tile: a 10 mm marker in the top-right
+  corner, a raised icon, and an optional word along the bottom. Underneath are
+  anti-studs so the block grips the baseplate.
+- START has a rounded top and no notch, so nothing can go above it. It has no
+  socket, so nothing can be plugged into it.
+- Parameter tiles are 2×4 studs (16 × 32 mm) with a male dovetail on the left
+  that only fits the socket on the **right** edge of a statement block. A
+  block without a socket cannot take a parameter; a block with a socket has an
+  engraved outline so an empty one is visible at a glance.
+- REPEAT and IF are ordinary 32 mm head blocks. Below them hangs a **spine**:
+  a 16 mm wide bar, printed in lengths of 1 to 4 rows, with the same notch and
+  tab so the main column continues underneath it. The loop body is whatever
+  sits in the column immediately to the right of the spine. The spine's foot
+  says "end", so the child can see where the loop stops.
+- Nesting is therefore 16 mm (2 studs) of indentation per level, exactly the
+  spine width. A spine can carry another REPEAT, whose own spine indents a
+  further 16 mm.
+
+![The version 1 block families](images/block-gallery.svg)
 
 ## Program layout on the baseplate
 
-A 32×32 baseplate (256 mm square) gives an 8 × 8 grid of 32 mm cells.
-Reserve the leftmost column for the main program (START at row 1), allow up to
-3 levels of nesting to the right, and keep the far-right columns for parameter
-tiles. That caps a program at about 7 top-level statements plus nested bodies,
-which is plenty for version 1. Two baseplates side by side double it later.
+![An example program on a baseplate](images/program-layout.svg)
+
+A 32×32 baseplate (256 mm square) gives 8 rows of 32 mm. The main column sits
+one stud in from the left edge; a block plus its parameter tile is 48 mm wide,
+and each nesting level adds 16 mm. Three levels of nesting plus parameters use
+under half the plate width, which leaves room for a second program column later
+(for example a "when bumped" event handler). The four corner markers belong to
+the camera stand, not to the program; they let the brain map pixels to
+millimetres however the camera is seated.
 
 ## Things to test with paper first
 

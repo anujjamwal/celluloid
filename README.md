@@ -15,6 +15,8 @@ compiles it into a program, and sends it to the LEGO hub over Bluetooth. The
 child never touches a screen; feedback comes from lights, sounds and the robot
 itself.
 
+![An example program on a baseplate](docs/images/program-layout.svg)
+
 ## Status
 
 Concept and interaction-design phase. Nothing is built yet. The documents under
