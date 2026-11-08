@@ -1,7 +1,6 @@
-coverage/
-rdoc/
-doc/
-pkg/
-.yardoc
-.bundle
-Gemfile.lock
+__pycache__/
+*.pyc
+.venv/
+*.stl.bak
+*.3mf.bak
+.DS_Store
