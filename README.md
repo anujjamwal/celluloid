@@ -33,6 +33,7 @@ robot: **LEGO SPIKE Prime + Expansion Set** running Pybricks.
 | [docs/05-roadmap.md](docs/05-roadmap.md) | Phases, what to build first, and the decisions that are still open |
 | [docs/decisions.md](docs/decisions.md) | Decision log: SPIKE Prime is the target robot, camera is the reader, blocks are passive prints |
 | [docs/06-robot-mapping.md](docs/06-robot-mapping.md) | Which LEGO kits work, the standard robot build, and how every block becomes a motor or sensor call |
+| [docs/07-lego-app-blocks.md](docs/07-lego-app-blocks.md) | Reference: the Icon Blocks and Word Blocks in LEGO's own app, and how ours line up |
 
 ## What exists today
 
