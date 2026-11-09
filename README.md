@@ -31,6 +31,7 @@ Concept and interaction-design phase. Nothing is built yet. The documents under
 | [docs/03-interaction-design.md](docs/03-interaction-design.md) | What a session feels like for the child, block vocabulary and grammar, feedback without a screen, error handling |
 | [docs/04-architecture.md](docs/04-architecture.md) | Brain hardware, software pipeline, robot driver layer (Pybricks / ev3dev), block encoding, printing plan |
 | [docs/05-roadmap.md](docs/05-roadmap.md) | Phases, what to build first, and the decisions that are still open |
+| [docs/06-robot-mapping.md](docs/06-robot-mapping.md) | Which LEGO kits work, the standard robot build, and how every block becomes a motor or sensor call |
 
 ## Planned repository layout
 

@@ -33,7 +33,7 @@ firmware.
    Sensors, conditions and variables come later as separate block families.
 6. **One abstraction over the robot.** The brain produces a small
    hub-independent program; a driver layer talks to whatever LEGO hub is on the
-   table (SPIKE / Robot Inventor, EV3, Boost, WeDo).
+   table (SPIKE / Robot Inventor, EV3, Boost, Essential).
 
 ## The LEGO landscape we are building on
 
@@ -48,8 +48,9 @@ Facts worth having straight before designing.
   (6 ports, 5×5 LED matrix, gyro, Bluetooth Low Energy). LEGO retired the
   MINDSTORMS brand at the end of 2022, but the hub lives on in SPIKE Prime and
   the hardware is fully supported by Pybricks.
-- **SPIKE Prime / SPIKE Essential**, **Boost**, **WeDo 2.0**, **Powered Up**
-  hubs: all BLE, all supported by Pybricks.
+- **SPIKE Prime / SPIKE Essential**, **Boost**, **Powered Up** (City and
+  Technic) hubs: all BLE, all supported by Pybricks. **WeDo 2.0** is BLE too
+  but is not supported by Pybricks and would need its own driver.
 - **Pybricks** is an open-source MicroPython firmware for every modern LEGO
   hub. It is the key enabler here: it lets a Raspberry Pi send and run a
   program on the hub over BLE, and lets a running hub program exchange messages
