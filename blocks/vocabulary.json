@@ -1,0 +1,80 @@
+{
+  "_comment": "Single source of truth for every physical piece. Marker ids are ArUco DICT_4X4_100. Geometry in mm; marker_offset is the marker centre relative to the piece's top-left corner.",
+  "dictionary": "DICT_4X4_100",
+  "geometry": {
+    "block_mm": 32, "tile_mm": 16, "indent_mm": 16, "stud_mm": 8,
+    "marker_mm": {"block": 10, "tile": 8, "spine": 8, "corner": 10},
+    "marker_offset": {"block": [25, 7], "start": [25, 9], "tile": [8, 6], "spine": [8, 8]}
+  },
+  "pieces": [
+    {"id": 0,  "name": "start",      "kind": "start",     "family": "start",   "label": "START",      "icon": "flag",      "socket": null},
+
+    {"id": 1,  "name": "forward",    "kind": "statement", "family": "motion",  "label": "forward",    "icon": "up",        "socket": "number"},
+    {"id": 2,  "name": "back",       "kind": "statement", "family": "motion",  "label": "back",       "icon": "down",      "socket": "number"},
+    {"id": 3,  "name": "turn_left",  "kind": "statement", "family": "motion",  "label": "turn left",  "icon": "left",      "socket": "number"},
+    {"id": 4,  "name": "turn_right", "kind": "statement", "family": "motion",  "label": "turn right", "icon": "right",     "socket": "number"},
+    {"id": 5,  "name": "stop",       "kind": "statement", "family": "motion",  "label": "stop",       "icon": "stop",      "socket": null},
+
+    {"id": 6,  "name": "beep",       "kind": "statement", "family": "action",  "label": "beep",       "icon": "note",      "socket": "note"},
+    {"id": 7,  "name": "light",      "kind": "statement", "family": "action",  "label": "light",      "icon": "bulb",      "socket": "colour"},
+    {"id": 8,  "name": "face",       "kind": "statement", "family": "action",  "label": "face",       "icon": "face",      "socket": "expression"},
+    {"id": 9,  "name": "wait",       "kind": "statement", "family": "action",  "label": "wait",       "icon": "hourglass", "socket": "number"},
+    {"id": 10, "name": "arm_up",     "kind": "statement", "family": "action",  "label": "arm up",     "icon": "arm",       "socket": null},
+    {"id": 11, "name": "arm_down",   "kind": "statement", "family": "action",  "label": "arm down",   "icon": "arm_down",  "socket": null},
+
+    {"id": 12, "name": "repeat",     "kind": "head",      "family": "control", "label": "repeat",     "icon": "loop",      "socket": "count"},
+    {"id": 13, "name": "if",         "kind": "head",      "family": "control", "label": "if",         "icon": "fork",      "socket": "sensor"},
+    {"id": 14, "name": "else",       "kind": "head",      "family": "control", "label": "else",       "icon": "else",      "socket": null},
+    {"id": 15, "name": "wait_until", "kind": "statement", "family": "control", "label": "wait until", "icon": "eye",       "socket": "sensor"},
+
+    {"id": 16, "name": "n1", "kind": "tile", "family": "param", "type": "number", "value": 1},
+    {"id": 17, "name": "n2", "kind": "tile", "family": "param", "type": "number", "value": 2},
+    {"id": 18, "name": "n3", "kind": "tile", "family": "param", "type": "number", "value": 3},
+    {"id": 19, "name": "n4", "kind": "tile", "family": "param", "type": "number", "value": 4},
+    {"id": 20, "name": "n5", "kind": "tile", "family": "param", "type": "number", "value": 5},
+    {"id": 21, "name": "n6", "kind": "tile", "family": "param", "type": "number", "value": 6},
+    {"id": 22, "name": "n7", "kind": "tile", "family": "param", "type": "number", "value": 7},
+    {"id": 23, "name": "n8", "kind": "tile", "family": "param", "type": "number", "value": 8},
+    {"id": 24, "name": "n9", "kind": "tile", "family": "param", "type": "number", "value": 9},
+    {"id": 25, "name": "forever", "kind": "tile", "family": "param", "type": "infinity", "value": "forever"},
+
+    {"id": 26, "name": "red",    "kind": "tile", "family": "param", "type": "colour", "value": "red",    "hex": "#e53935"},
+    {"id": 27, "name": "green",  "kind": "tile", "family": "param", "type": "colour", "value": "green",  "hex": "#43a047"},
+    {"id": 28, "name": "blue",   "kind": "tile", "family": "param", "type": "colour", "value": "blue",   "hex": "#1e88e5"},
+    {"id": 29, "name": "yellow", "kind": "tile", "family": "param", "type": "colour", "value": "yellow", "hex": "#fdd835"},
+    {"id": 30, "name": "white",  "kind": "tile", "family": "param", "type": "colour", "value": "white",  "hex": "#fafafa"},
+
+    {"id": 31, "name": "note_low",  "kind": "tile", "family": "param", "type": "note", "value": "low"},
+    {"id": 32, "name": "note_mid",  "kind": "tile", "family": "param", "type": "note", "value": "mid"},
+    {"id": 33, "name": "note_high", "kind": "tile", "family": "param", "type": "note", "value": "high"},
+
+    {"id": 34, "name": "happy",     "kind": "tile", "family": "param", "type": "expression", "value": "happy"},
+    {"id": 35, "name": "surprised", "kind": "tile", "family": "param", "type": "expression", "value": "surprised"},
+    {"id": 36, "name": "sleepy",    "kind": "tile", "family": "param", "type": "expression", "value": "sleepy"},
+
+    {"id": 37, "name": "close",       "kind": "tile", "family": "sensor", "type": "sensor", "value": "distance_close", "label": "close",  "icon": "waves"},
+    {"id": 38, "name": "bumped",      "kind": "tile", "family": "sensor", "type": "sensor", "value": "bumped",         "label": "bump",   "icon": "bump"},
+    {"id": 39, "name": "sees_colour", "kind": "tile", "family": "sensor", "type": "sensor", "value": "sees_colour",    "label": "sees",   "icon": "eye", "takes": "colour"},
+    {"id": 40, "name": "dark",        "kind": "tile", "family": "sensor", "type": "sensor", "value": "dark",           "label": "dark",   "icon": "moon"},
+    {"id": 41, "name": "bright",      "kind": "tile", "family": "sensor", "type": "sensor", "value": "bright",         "label": "bright", "icon": "sun"},
+    {"id": 42, "name": "shaken",      "kind": "tile", "family": "sensor", "type": "sensor", "value": "shaken",         "label": "shake",  "icon": "shake"},
+
+    {"id": 43, "name": "spine1", "kind": "spine", "family": "control", "rows": 1},
+    {"id": 44, "name": "spine2", "kind": "spine", "family": "control", "rows": 2},
+    {"id": 45, "name": "spine3", "kind": "spine", "family": "control", "rows": 3},
+    {"id": 46, "name": "spine4", "kind": "spine", "family": "control", "rows": 4},
+
+    {"id": 90, "name": "corner_tl", "kind": "corner", "family": "stand"},
+    {"id": 91, "name": "corner_tr", "kind": "corner", "family": "stand"},
+    {"id": 92, "name": "corner_bl", "kind": "corner", "family": "stand"},
+    {"id": 93, "name": "corner_br", "kind": "corner", "family": "stand"}
+  ],
+  "socket_accepts": {
+    "number": ["number"],
+    "count": ["number", "infinity"],
+    "colour": ["colour"],
+    "note": ["note"],
+    "expression": ["expression"],
+    "sensor": ["sensor"]
+  }
+}

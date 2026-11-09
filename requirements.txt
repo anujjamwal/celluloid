@@ -1,0 +1,8 @@
+# Brain (Raspberry Pi Zero 2 W, Raspberry Pi OS Lite, Python 3.11+)
+# On the Pi prefer:  sudo apt install python3-opencv python3-picamera2 python3-numpy
+opencv-python-headless>=4.8
+numpy>=1.24
+bleak>=0.21          # Bluetooth LE to the hub
+pybricksdev>=1.0     # only to download hub/pybricks/interpreter.py to the hub
+# Development
+pytest>=7

@@ -6,9 +6,31 @@ sketches, not the CAD; the CAD will be derived from the numbers in
 docs/04-architecture.md once the vocabulary is frozen.
 """
 import random
+import sys
 from pathlib import Path
 
-OUT = Path(__file__).resolve().parent.parent / "docs" / "images"
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+OUT = ROOT / "docs" / "images"
+
+from brain.language.vocabulary import default as vocabulary  # noqa: E402
+
+V = vocabulary()
+try:
+    from brain.reader.aruco import marker_cells as _real_cells
+except Exception:  # OpenCV missing: fall back to a random pattern so sketches still render
+    _real_cells = None
+
+
+def marker_cells(marker_id: int):
+    if _real_cells is not None:
+        return _real_cells(marker_id, V.dictionary)
+    rnd = random.Random(marker_id)
+    return [[0 if r in (0, 5) or c in (0, 5) else int(rnd.random() < 0.5) for c in range(6)] for r in range(6)]
+
+
+def pid(name: str) -> int:
+    return V.by_name[name].id
 
 # Block geometry (mm)
 W = 32            # statement block width / height
@@ -61,16 +83,18 @@ def spine_outline(x, y, rows):
             (x + NOTCH_X1, y + h + NOTCH_D), (x + NOTCH_X0, y + h + NOTCH_D), (x + NOTCH_X0, y + h), (x, y + h)]
 
 
-def marker(x, y, side, seed, S):
-    """A fake 4x4 ArUco marker with black border, side mm, at (x, y) mm."""
-    rnd = random.Random(seed)
+def marker(x, y, side, marker_id, S, quiet=1.0):
+    """The real ArUco marker for marker_id: black cells on a white field, side mm,
+    at (x, y) mm, with a white quiet zone of `quiet` mm around it."""
+    cells = marker_cells(marker_id)
     c = side / 6
-    out = [f'<rect x="{x*S:.1f}" y="{y*S:.1f}" width="{side*S:.1f}" height="{side*S:.1f}" fill="#111"/>']
-    for i in range(4):
-        for j in range(4):
-            if rnd.random() < 0.5:
-                out.append(f'<rect x="{(x+c*(1+i))*S:.1f}" y="{(y+c*(1+j))*S:.1f}" '
-                           f'width="{c*S:.1f}" height="{c*S:.1f}" fill="#fff"/>')
+    out = [f'<rect x="{(x-quiet)*S:.2f}" y="{(y-quiet)*S:.2f}" width="{(side+2*quiet)*S:.2f}" '
+           f'height="{(side+2*quiet)*S:.2f}" fill="#fff"/>']
+    for r in range(6):
+        for col in range(6):
+            if cells[r][col] == 0:
+                out.append(f'<rect x="{(x+c*col)*S:.2f}" y="{(y+c*r)*S:.2f}" '
+                           f'width="{c*S+0.3:.2f}" height="{c*S+0.3:.2f}" fill="#000"/>')
     return "\n".join(out)
 
 
@@ -122,6 +146,22 @@ def icon(kind, cx, cy, S, size=14, color="#fff"):
     if kind == "bump":
         return (f'<path d="M{X-s},{Y+s*0.6} H{X+s} M{X-s*0.4},{Y+s*0.6} V{Y-s*0.4} H{X+s*0.4} V{Y+s*0.6}" {st}/>'
                 f'<path d="M{X},{Y-s} V{Y-s*0.6}" {st}/>')
+    if kind == "arm_down":
+        return (f'<path d="M{X-s*0.8},{Y-s} V{Y+s*0.2} L{X+s*0.4},{Y+s*0.9} M{X+s*0.4},{Y+s*0.9} L{X+s*0.9},{Y+s*0.4}" {st}/>')
+    if kind == "else":
+        return (f'<path d="M{X},{Y-s} V{Y} M{X},{Y} L{X-s*0.7},{Y+s*0.8} M{X},{Y} L{X+s*0.7},{Y+s*0.8}" {st}/>'
+                f'<circle cx="{X-s*0.7}" cy="{Y+s*0.8}" r="{s*0.2}" fill="{color}"/>'
+                f'<circle cx="{X+s*0.7}" cy="{Y+s*0.8}" r="{s*0.2}" fill="{color}"/>')
+    if kind == "moon":
+        return f'<path d="M{X+s*0.3},{Y-s*0.9} A{s*0.9},{s*0.9} 0 1 0 {X+s*0.9},{Y+s*0.5} A{s*0.7},{s*0.7} 0 1 1 {X+s*0.3},{Y-s*0.9} Z" fill="{color}"/>'
+    if kind == "sun":
+        rays = "".join(f'<line x1="{X+s*0.75*__import__("math").cos(a)}" y1="{Y+s*0.75*__import__("math").sin(a)}" '
+                       f'x2="{X+s*1.0*__import__("math").cos(a)}" y2="{Y+s*1.0*__import__("math").sin(a)}" {st}/>'
+                       for a in [i * 0.785 for i in range(8)])
+        return f'<circle cx="{X}" cy="{Y}" r="{s*0.45}" fill="{color}"/>' + rays
+    if kind == "shake":
+        return (f'<rect x="{X-s*0.35}" y="{Y-s*0.6}" width="{s*0.7}" height="{s*1.2}" rx="{s*0.1}" {st}/>'
+                f'<path d="M{X-s*0.7},{Y-s*0.5} q{-s*0.3},{s*0.5} 0,{s} M{X+s*0.7},{Y-s*0.5} q{s*0.3},{s*0.5} 0,{s}" {st}/>')
     if kind == "infinity":
         return (f'<path d="M{X},{Y} C{X-s*0.3},{Y-s*0.8} {X-s*1.1},{Y-s*0.6} {X-s*1.0},{Y} '
                 f'C{X-s*1.1},{Y+s*0.6} {X-s*0.3},{Y+s*0.8} {X},{Y} '
@@ -135,11 +175,12 @@ def text(x, y, s, S, size=3.2, anchor="middle", weight="700", color="#fff", font
             f'font-weight="{weight}" text-anchor="{anchor}" fill="{color}">{s}</text>')
 
 
-def statement(x, y, S, family, ic, label, seed, socket=True, stroke=None):
+def statement(x, y, S, family, ic, label, marker_id, socket=True, stroke=None):
     fill = COL[family]
     out = [f'<polygon points="{pts([(px*S, py*S) for px, py in statement_outline(x, y, socket)])}" '
            f'fill="{fill}" stroke="{stroke or COL["stroke"]}" stroke-width="{0.5*S:.1f}" stroke-linejoin="round"/>']
-    out.append(marker(x + 20, y + 2, MARK, seed, S))
+    mx, my = V.geometry["marker_offset"]["block"]
+    out.append(marker(x + mx - MARK / 2, y + my - MARK / 2, MARK, marker_id, S))
     out.append(icon(ic, x + 11, y + 15, S))
     if socket:
         # engraved outline of the empty socket so a missing parameter is visible
@@ -149,21 +190,23 @@ def statement(x, y, S, family, ic, label, seed, socket=True, stroke=None):
     return "\n".join(out)
 
 
-def start(x, y, S, seed=1):
+def start(x, y, S, marker_id=0):
     out = [f'<path d="{start_outline(x, y, S)}" fill="{COL["start"]}" stroke="{COL["stroke"]}" '
            f'stroke-width="{0.5*S:.1f}" stroke-linejoin="round"/>']
-    out.append(marker(x + 20, y + 4, MARK, seed, S))
+    mx, my = V.geometry["marker_offset"]["start"]
+    out.append(marker(x + mx - MARK / 2, y + my - MARK / 2, MARK, marker_id, S))
     out.append(icon("flag", x + 11, y + 15, S))
     out.append(text(x + 16, y + 29.2, "START", S, size=3.6))
     return "\n".join(out)
 
 
-def tile(x, y, S, kind, value, seed):
+def tile(x, y, S, kind, value, marker_id):
     fill = COL["sensor"] if kind == "sensor" else COL["param"]
     ink = "#2b2b2b"
     out = [f'<polygon points="{pts([(px*S, py*S) for px, py in tile_outline(x, y)])}" fill="{fill}" '
            f'stroke="{COL["stroke"]}" stroke-width="{0.5*S:.1f}" stroke-linejoin="round"/>']
-    out.append(marker(x + 4, y + 2, MARK_SMALL, seed, S))
+    mx, my = V.geometry["marker_offset"]["tile"]
+    out.append(marker(x + mx - MARK_SMALL / 2, y + my - MARK_SMALL / 2, MARK_SMALL, marker_id, S, quiet=0.8))
     if kind == "number":
         n = int(value)
         rows = [min(3, n - 3 * r) for r in range((n + 2) // 3)]
@@ -178,16 +221,28 @@ def tile(x, y, S, kind, value, seed):
                    f'rx="{1.5*S:.1f}" fill="{value}" stroke="{ink}" stroke-width="{0.4*S:.1f}"/>')
     elif kind == "infinity":
         out.append(icon("infinity", x + 8, y + 21, S, size=10, color=ink))
+    elif kind == "note":
+        h = {"low": 4, "mid": 7, "high": 10}[value]
+        out.append(icon("note", x + 8, y + 19, S, size=9, color=ink))
+        out.append(f'<rect x="{(x+3)*S:.1f}" y="{(y+30-h)*S:.1f}" width="{2*S:.1f}" height="{h*S:.1f}" fill="{ink}"/>')
+    elif kind == "expression":
+        out.append(icon("face", x + 8, y + 19, S, size=9, color=ink))
+        out.append(text(x + 8, y + 30, value[:5], S, size=2.6, color=ink))
     elif kind == "sensor":
         out.append(icon(value, x + 8, y + 19, S, size=10, color=ink))
-        out.append(text(x + 8, y + 30, {"waves": "close", "bump": "bump", "eye": "sees"}[value], S, size=2.8, color=ink))
+        out.append(text(x + 8, y + 30, SENSOR_LABEL.get(value, ""), S, size=2.8, color=ink))
     return "\n".join(out)
 
 
 def spine(x, y, rows, S):
+    mx, my = V.geometry["marker_offset"]["spine"]
     return (f'<polygon points="{pts([(px*S, py*S) for px, py in spine_outline(x, y, rows)])}" fill="{COL["spine"]}" '
             f'stroke="{COL["stroke"]}" stroke-width="{0.5*S:.1f}" stroke-linejoin="round"/>'
+            + marker(x + mx - MARK_SMALL / 2, y + my - MARK_SMALL / 2, MARK_SMALL, pid(f"spine{rows}"), S, quiet=0.8)
             + text(x + 8, y + rows * W - 3, "end", S, size=3, color="#2b2b2b"))
+
+
+SENSOR_LABEL = {"waves": "close", "bump": "bump", "eye": "sees", "moon": "dark", "sun": "bright", "shake": "shake"}
 
 
 def svg(width_mm, height_mm, S, body, title):
@@ -261,48 +316,71 @@ def gallery():
     y = 6
     body.append(text(4, y, "Version 1 block families (icons are first drafts to test on paper)", S, size=4, anchor="start", color="#222"))
     rows = [
-        ("Start and motion (blue)", [("start",), ("motion", "up", "forward", True), ("motion", "down", "back", True),
-                                     ("motion", "left", "turn left", True), ("motion", "right", "turn right", True), ("motion", "stop", "stop", False)]),
-        ("Action (purple)", [("action", "note", "beep", True), ("action", "bulb", "light", True), ("action", "face", "face", True),
-                             ("action", "hourglass", "wait", True), ("action", "arm", "arm up", False)]),
-        ("Control (orange) and the spine that makes a loop body", [("control", "loop", "repeat", True), ("control", "fork", "if", True),
-                                                                    ("control", "eye", "wait until", True), ("spine", 2)]),
+        ("Start and motion (blue)", ["start", "forward", "back", "turn_left", "turn_right", "stop"]),
+        ("Action (purple)", ["beep", "light", "face", "wait", "arm_up", "arm_down"]),
+        ("Control (orange) and the spine that makes a loop body", ["repeat", "if", "else", "wait_until", "spine2"]),
     ]
-    seed = 100
-    for title, items in rows:
+    for title, names in rows:
         y += 8
         body.append(text(4, y, title, S, size=3.2, anchor="start", weight="400", color="#444"))
         y += 3
         x = 6
-        for it in items:
-            seed += 1
-            if it[0] == "start":
-                body.append(start(x, y, S, seed))
-            elif it[0] == "spine":
-                body.append(spine(x, y, it[1], S))
+        for name in names:
+            body.append(piece_svg(name, x, y, S))
+            if name.startswith("spine"):
                 body.append(text(x + 20, y + 10, "spine, 1 to 4 rows long,", S, size=2.6, anchor="start", weight="400", color="#444"))
-                body.append(text(x + 20, y + 14, "hangs under REPEAT or IF;", S, size=2.6, anchor="start", weight="400", color="#444"))
-                body.append(text(x + 20, y + 18, "the loop body sits to its right", S, size=2.6, anchor="start", weight="400", color="#444"))
+                body.append(text(x + 20, y + 14, "hangs under REPEAT, IF or ELSE;", S, size=2.6, anchor="start", weight="400", color="#444"))
+                body.append(text(x + 20, y + 18, "the body sits to its right", S, size=2.6, anchor="start", weight="400", color="#444"))
                 x += 20
-            else:
-                fam, ic, label, sock = it
-                body.append(statement(x, y, S, fam, ic, label, seed, socket=sock))
             x += 42
         y += W + 6
     y += W + 6
     body.append(text(4, y, "Parameter tiles (white) and sensor tiles (yellow): they plug into the socket on the right of a block", S, size=3.2, anchor="start", weight="400", color="#444"))
     y += 3
     x = 10
-    for kind, val in [("number", 1), ("number", 3), ("number", 5), ("colour", "#e53935"), ("colour", "#1e88e5"), ("infinity", None),
-                      ("sensor", "waves"), ("sensor", "bump"), ("sensor", "eye")]:
-        seed += 1
-        body.append(tile(x, y, S, kind, val, seed))
+    for name in ["n1", "n3", "n5", "forever", "red", "blue", "note_mid", "happy", "close", "bumped", "sees_colour", "dark", "bright", "shaken"]:
+        body.append(piece_svg(name, x, y, S))
         x += 24
     y += W + 10
-    return svg(262, y, S, "\n".join(body), "Block gallery")
+    return svg(362, y, S, "\n".join(body), "Block gallery")
+
+
+def piece_svg(name: str, x: float, y: float, S: float) -> str:
+    """Draw any vocabulary piece by name with its real marker."""
+    p = V.by_name[name]
+    if p.kind == "start":
+        return start(x, y, S, p.id)
+    if p.kind in ("statement", "head"):
+        return statement(x, y, S, p.family, p.icon, p.label, p.id, socket=p.socket is not None)
+    if p.kind == "spine":
+        return spine(x, y, p.rows, S)
+    if p.kind == "tile":
+        value = {"number": p.value, "colour": p.extra.get("hex"), "infinity": None, "sensor": p.icon,
+                 "note": p.value, "expression": p.value}[p.type]
+        return tile(x, y, S, p.type, value, p.id)
+    raise ValueError(name)
 
 
 # ---------------------------------------------------------------- layout
+# (piece name, x in 16 mm columns, y in 32 mm rows), relative to START
+EXAMPLE_PROGRAM = [
+    ("start", 0, 0),
+    ("forward", 0, 1), ("n3", 2, 1),
+    ("repeat", 0, 2), ("n4", 2, 2),
+    ("spine3", 0, 3),
+    ("forward", 1, 3), ("n2", 3, 3),
+    ("turn_right", 1, 4), ("n1", 3, 4),
+    ("beep", 1, 5),
+    ("light", 0, 6), ("red", 2, 6),
+]
+
+
+def corner_centres(pad, oy, base):
+    """Centres (mm) of the four stand markers, keyed by marker id."""
+    return {90: (pad + 6, oy + 6), 91: (pad + base - 6, oy + 6),
+            92: (pad + 6, oy + base - 6), 93: (pad + base - 6, oy + base - 6)}
+
+
 def layout():
     S = 3.2
     pad = 6
@@ -315,18 +393,12 @@ def layout():
         for j in range(32):
             body.append(f'<circle cx="{(pad+4+8*i)*S:.1f}" cy="{(oy+4+8*j)*S:.1f}" r="{1.9*S:.1f}" fill="#dcdcdc" stroke="#c8c8c8" stroke-width="{0.2*S}"/>')
     # four stand markers at the corners of the baseplate area
-    for (mx, my) in [(pad, oy), (pad + base - 12, oy), (pad, oy + base - 12), (pad + base - 12, oy + base - 12)]:
-        body.append(marker(mx + 1, my + 1, 10, 900 + mx + my, S))
+    for cid, (cx, cy) in corner_centres(pad, oy, base).items():
+        body.append(marker(cx - 5, cy - 5, 10, cid, S))
     ox, r = pad + 16, oy + 16
     # program: START, forward 3, repeat 4 { forward 2, turn right, beep }, light red, stop
-    body.append(start(ox, r, S, 1))
-    body.append(statement(ox, r + W, S, "motion", "up", "forward", 2)); body.append(tile(ox + W, r + W, S, "number", 3, 3))
-    body.append(statement(ox, r + 2 * W, S, "control", "loop", "repeat", 4)); body.append(tile(ox + W, r + 2 * W, S, "number", 4, 5))
-    body.append(spine(ox, r + 3 * W, 3, S))
-    body.append(statement(ox + TILE_W, r + 3 * W, S, "motion", "up", "forward", 6)); body.append(tile(ox + TILE_W + W, r + 3 * W, S, "number", 2, 7))
-    body.append(statement(ox + TILE_W, r + 4 * W, S, "motion", "right", "turn right", 8)); body.append(tile(ox + TILE_W + W, r + 4 * W, S, "number", 1, 9))
-    body.append(statement(ox + TILE_W, r + 5 * W, S, "action", "note", "beep", 10, socket=False))
-    body.append(statement(ox, r + 6 * W, S, "action", "bulb", "light", 11)); body.append(tile(ox + W, r + 6 * W, S, "colour", "#e53935", 12))
+    for name, col, row in EXAMPLE_PROGRAM:
+        body.append(piece_svg(name, ox + col * TILE_W, r + row * W, S))
     # read-aloud transcript on the right
     tx = pad + 150
     ty = oy + 20

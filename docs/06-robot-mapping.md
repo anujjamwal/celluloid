@@ -29,11 +29,11 @@ stays on the table.
 | **Boost 17101** | Move hub | 2 external + 2 built-in motors | 1 external | colour/distance | none (one RGB light) | tilt only | yes |
 | **WeDo 2.0** | WeDo smart hub | 2 | 1 | tilt, motion | none | no | **no**: would need its own driver |
 
-The best fit is the Inventor or Prime hub: six ports, a gyro that makes 90°
-turns accurate, a matrix that can show the current block number, and first
-class Pybricks support. EV3 works too, through Pybricks' newer EV3 support or
-the older `ev3dev` Python route, but turns are less accurate without the gyro
-and the brick is slower to boot.
+**We are building for SPIKE Prime with the Expansion Set** (see
+`decisions.md`): six ports, a gyro that makes 90° turns accurate, a matrix
+that can show the current block number, a force sensor for *bumped*, and first
+class Pybricks support. The other rows stay in the table only to show what a
+port to another hub would involve.
 
 ## The standard robot build
 
@@ -41,24 +41,26 @@ Every block in version 1 assumes one robot shape: a **driving base**. LEGO
 publishes instructions for one in every kit (Robot Inventor: the base used by
 "Tricky"; SPIKE Prime: "Driving Base"; EV3: "Educator Vehicle" / "Track3r").
 
-- Two drive motors on fixed ports (left A, right B on Prime/Inventor; B and C on EV3).
+- Two medium motors for the drive wheels (LEGO's SPIKE Prime Driving Base
+  puts them on A and E; any pair works if the config block says so).
 - A caster or skid at the back.
 - Distance sensor facing forward on a fixed port (for *sees something close*).
 - Colour sensor pointing at the floor on a fixed port (for *sees colour*, *dark/bright*).
 - Optional third motor for an arm or grabber (*arm up / arm down*).
-- Force sensor or touch sensor on the front bumper (*bumped*). The Inventor
-  kit has no force sensor; on that hub *bumped* maps to a sharp deceleration
-  read from the accelerometer, or the block is simply left out of the set.
+- Force sensor on the front bumper (*bumped*).
+- The Expansion Set's second colour sensor and second large motor are spare
+  for version 2 (a line-following "follow" block, a second arm).
 
 The robot's geometry and port map live in one config block at the top of the
 hub program, so any build works as long as that block is right:
 
 ```python
-WHEEL_DIAMETER_MM = 56
-AXLE_TRACK_MM     = 112
-LEFT, RIGHT, ARM  = Port.A, Port.B, Port.C
-DISTANCE, COLOUR  = Port.D, Port.E
-UNIT_MM           = 150     # what "forward 1" means
+WHEEL_DIAMETER_MM = 56      # SPIKE Prime small wheel (56 mm) or large (88 mm)
+AXLE_TRACK_MM     = 112     # measure centre to centre between the wheels
+LEFT, RIGHT       = Port.A, Port.E
+ARM, DISTANCE     = Port.C, Port.D
+COLOUR, FORCE     = Port.F, Port.B
+UNIT_MM           = 150     # what "forward 1" means: one floor square
 ```
 
 ### What "forward 1" means
@@ -133,12 +135,10 @@ moving to the real app later is a continuation:
    accordingly. A missing heartbeat for 2 s stops the motors.
 5. On `done` the hub shows a smiley and waits for the next program.
 
-## What this means for the open decision
+## Porting later
 
-- **Inventor / Prime hub:** everything above works as written. Start here if
-  you have it.
-- **EV3:** same blocks, same brain; swap the hub program for the EV3 variant,
-  accept less precise turns unless you have the gyro, and expect 30 to 60 s of
-  brick boot time.
+- **EV3:** same blocks, same brain; swap the hub program for an EV3 variant,
+  accept less precise turns unless the education gyro is fitted, and expect
+  30 to 60 s of brick boot time.
 - **Essential or Boost:** a smaller vocabulary (no arm, limited sensors, no
-  matrix); still a good fit for a younger child.
+  matrix); a good fit for a younger sibling.

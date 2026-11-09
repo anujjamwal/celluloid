@@ -2,9 +2,7 @@
 
 ## Decisions needed before anything else
 
-1. **Which robot?** EV3 brick, Robot Inventor / SPIKE Prime hub, or
-   something else? This picks the hub driver and the firmware story
-   (Pybricks vs ev3dev). It also sets what "Forward 1" means physically.
+1. ~~Which robot?~~ **Settled: SPIKE Prime + Expansion Set** (see `decisions.md`).
 2. **How old is she, and does she read yet?** Decides icon-only versus
    icon-plus-word, number tiles versus repeated blocks, and block size.
 3. **Printer capabilities.** Single colour with pause-and-swap, or
@@ -16,16 +14,22 @@
 ## Phases
 
 ### Phase 0 · Paper prototype (1 to 2 weekends, no printing)
-- Print the block icons on card, cut 32 mm tiles, use a real baseplate.
+- **Ready to print:** `docs/paper/paper-blocks.pdf` (3 pages of 1:1 tiles with
+  real markers, plus the stand markers). Run `python tools/paper_tiles.py`
+  to regenerate after changing the vocabulary.
+- Cut the tiles, use a real baseplate.
 - Parent plays the robot. Try 10 small tasks (drive to the cup, draw a square,
   dance). Note which icons confuse, whether REPEAT is understood, whether she
   wants numbers.
 - Freeze the version 1 vocabulary from what we learn.
 
 ### Phase 1 · Pipeline on a laptop (1 to 2 weekends)
-- Webcam + printed paper ArUco tiles + Pybricks on the hub.
-- `reader → language → driver` working end to end, robot drives from a photo.
-- Simulator driver and unit tests for layout and validation.
+- **Done in code, untested on hardware:** `reader → language → driver`
+  exists; the synthetic camera test proves image → markers → mm → program;
+  the hub interpreter and the BLE driver are written from the Pybricks
+  documentation and still need a real hub.
+- Next: photograph the paper tiles with a webcam, run
+  `python -m brain.main --image photo.jpg --simulate`, then with the hub.
 - Deliverable: a video of the robot moving from a paper program.
 
 ### Phase 2 · Real blocks and the brain (3 to 5 weekends)

@@ -110,8 +110,10 @@ The interpreter is one MicroPython file per hub family:
   protocol over Bluetooth serial or Wi-Fi.
 
 Transport detail for Pybricks hubs: the hub program reads lines from `stdin`
-and writes to `stdout`; `pybricksdev` on the Pi exposes both over BLE. Each
-message is one JSON line.
+and writes to `stdout`, which Pybricks carries over its BLE service. The brain
+speaks that service directly with `bleak` (`brain/drivers/pybricks_ble.py`).
+Each message is one JSON line; the full message list is at the top of
+`hub/pybricks/interpreter.py`.
 
 ## Block identity encoding (camera)
 
@@ -121,11 +123,16 @@ message is one JSON line.
   the notch and the socket); the icon fills the rest. Parameter tiles get an
   8 mm marker. At the planned 2304 px capture width a 10 mm marker is about
   125 px across; ArUco decodes reliably down to roughly 25 px.
-- **Printing the marker:** black block body, pause at the top layer and swap to
-  white filament so the marker cells and the icon print in white (or the
-  reverse). Single-colour printers do this with a filament-change pause; AMS or
-  multi-material printers do it automatically. Fallback: recess for a printed
-  vinyl sticker, laminated.
+- **Marker polarity:** ArUco wants a dark pattern on a light field, so the
+  marker is a white 12 mm square (10 mm pattern plus a 1 mm quiet zone) with
+  black cells, whatever colour the block body is. The detector runs in its
+  default mode; no inverted-marker option.
+- **Printing the marker:** three colours meet on the top face (body colour,
+  white field, black cells). A multi-material printer does this directly. On a
+  single-extruder printer the practical route is a 0.4 mm recess for a
+  laser-printed sticker covered with clear tape, or two filament-change pauses
+  in the last 0.6 mm (white, then black) if you have the patience. The icon can
+  be white in either case.
 - **Stand markers:** four fixed markers on the stand corners give the
   homography from image to baseplate millimetres, independent of exact camera
   position.
