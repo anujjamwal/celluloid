@@ -136,6 +136,44 @@ class CPU in a Zero footprint and would be the ideal compact board once its
 software settles; revisit it in 2027 rather than debugging a vendor kernel
 with a child waiting. **Orange Pi Zero 2W** only if price is everything.
 
+## The A733 class: Orange Pi Zero 3W and Radxa Cubie A7Z
+
+Same Allwinner A733 (2× Cortex-A76 + 6× Cortex-A55, 3 TOPS NPU), same
+65 × 30 mm footprint, two vendors. If this class is worth exploring, the
+question is which board, and the answer is Radxa's.
+
+| | Orange Pi Zero 3W | Radxa Cubie A7Z |
+| --- | --- | --- |
+| RAM | 1 to 16 GB LPDDR5 | 1 to 16 GB LPDDR4x |
+| Storage | microSD, optional eMMC or UFS | microSD, optional UFS |
+| Camera | 2× 4-lane CSI; no documented sensor support yet | 1× 4-lane CSI (v1.1), 2× on v2.0; sensor list not published either |
+| Wireless | Wi-Fi 6, BT 5.4, chip not named | Wi-Fi 6, BT 5.4, external antenna connector |
+| PCIe | Gen 3 ×1 on FPC | Gen 3 ×1 on FPC (NVMe works with some drives) |
+| Price | $25 claimed (1 GB); ~$56 for 4 GB on AliExpress | $19 to 35 for 1 GB; ~$62 for 2 GB at US resellers; often out of stock |
+| Idle / load power (reviews) | 2 to 3 W / 6.6 to 7 W | 1.9 to 2.0 W / 3.9 to 4.5 W, with a heatsink |
+| Thermals | reviewers used active cooling at 50 °C under stress | passive heatsink: 52 °C idle, under 70 °C in a 10 min stress test |
+| Software | Orange Pi images missing GPU/VPU userspace at launch, no NPU or camera results published, download links empty for weeks | Radxa OS (Debian) with working GPU and Vulkan, documented ACUITY NPU SDK and YOLO model zoo for the A733, the same docs tree as the Cubie A7A/A7S |
+| Community | thin | Radxa forum and docs; the one public A733 NPU project runs on this board |
+
+Two things the numbers settle:
+
+- **Power is not Radxa Zero 3W class.** The A76 cores cost roughly 2 W idle
+  and 4 to 7 W under load, which is Pi 5 territory under load and double the
+  Zero 3W at idle. Still power-bank feasible, but the "small and frugal"
+  advantage mostly belongs to the RK3566 board, not to the A733 ones.
+- **Same chip, different software.** The Orange Pi's problems are all
+  software and documentation, and Radxa ships the same SoC with the stack
+  the Orange Pi lacks. There is no reason to take the Orange Pi's risk to
+  get this chip.
+
+Where the A733 class sits for this project: compute between a Pi 4 and a Pi
+5 in a Zero footprint, so neural speech for everything the brain says is
+comfortable, and with 8 GB a 1B language model runs on the CPU at a few
+tokens per second. The NPU remains irrelevant to marker reading and only
+useful if we ever add a camera-based detector, where Radxa's model zoo makes
+it reachable. Software is still six months old: expect the vendor 5.15 kernel,
+no mainline, and camera sensor support to be discovered rather than read.
+
 ## Head to head: Pi 5 versus Radxa Zero 3W
 
 Size and power are real differences; "equally capable" is not. Numbers are
@@ -167,6 +205,10 @@ slot.
 
 **Decision rule**
 
+- Choose the **Radxa Cubie A7Z** (4 or 8 GB) if: you want Pi 5 class
+  compute in the Zero footprint, accept 2 W idle and a heatsink, and are
+  willing to be an early adopter on the A733 software stack. It is the
+  Orange Pi Zero 3W done properly.
 - Choose the **Radxa Zero 3W** if: the brain should be small and run from a
   battery, recorded voice clips are the plan (with Piper for short phrases at
   most), and any future "AI helper" may live elsewhere: on a home server over
@@ -183,12 +225,13 @@ machine elsewhere in the house. That decouples "small and low power" from
 
 ## Recommendation
 
-1. **Pick by the decision rule above.** If small size and low power are the
-   priorities, the Radxa Zero 3W with 4 GB is a sound primary board for this
-   project, with a USB autofocus webcam and local AI, if ever, running
-   off-board. If an on-board AI HAT+ 2 path or zero platform work matters
-   more, the Pi 5 with 4 GB. Either way, run the day-one smoke test below
-   before designing the enclosure around the board.
+1. **Pick by the decision rule above.** Three sanctioned boards: Radxa Zero
+   3W 4 GB (smallest power draw, most mature of the small boards), Radxa
+   Cubie A7Z 4 or 8 GB (Pi 5 class compute in the same footprint, early
+   software), Pi 5 4 GB (zero platform work, AI HAT+ 2 path). Orange Pi
+   Zero 3W is the same chip as the Cubie A7Z with worse software; skip it.
+   Either way, run the day-one smoke test below before designing the
+   enclosure around the board.
 2. **No accelerator now.** Version 1 and 2 (sensors, step mode, voice
    feedback) run entirely on the CPU.
 3. **Leave 20 mm of headroom and the GPIO stacking header in the enclosure

@@ -2,16 +2,26 @@
 
 Short records of choices that shape everything downstream. Newest first.
 
-## 2026-11-15 · Brain board: Radxa Zero 3W (4 GB) or Pi 5 (4 GB), by priority; no accelerator
+## 2026-11-15 · Brain board: shortlist of three, Orange Pi Zero 3W excluded
 
-Size and battery power favour the Radxa Zero 3W; an on-board local-AI path
-and zero platform work favour the Pi 5. Both are supported by the code (the
-Radxa route uses a USB webcam, an SPI-driven LED ring and libgpiod buttons).
-Current lean, given that size and power matter: **Radxa Zero 3W 4 GB**,
-confirmed only after the day-one smoke test in `08-brain-hardware-options.md`
-passes (BLE, webcam, ring, buttons, audio). Any local language model runs
-off-board (home server or opt-in cloud), which keeps the brain small. Coral
-ruled out; the first AI HAT+ ruled out; Zero 2 W stays as the budget build.
+Candidates, all supported by the code (non-Pi boards use a USB webcam, an
+SPI-driven LED ring and libgpiod buttons):
+
+- **Radxa Zero 3W 4 GB**: 65 × 30 mm, ~1 W idle, mature RK3566 software,
+  enough compute for version 1 and short neural phrases.
+- **Radxa Cubie A7Z 4 or 8 GB**: same footprint, Allwinner A733 with Pi 5
+  class compute, ~2 W idle and 4 to 5 W load with a heatsink, documented NPU
+  SDK; software six months old.
+- **Pi 5 4 GB**: largest and hungriest, zero platform work, AI HAT+ 2 path.
+
+**Orange Pi Zero 3W excluded**: same A733 as the Cubie A7Z, with missing
+userspace, no published camera or NPU results, and a thinner community.
+
+Choice is made after the day-one smoke test in `08-brain-hardware-options.md`
+(BLE for an hour, USB webcam read of the paper tiles, SPI ring, gpiod
+buttons, audio). Any local language model runs off-board (home server or
+opt-in cloud) unless the Pi 5 is chosen. Coral and the first AI HAT+ are
+ruled out; Zero 2 W stays as the budget build.
 
 ## 2026-11-09 · Markers are black-on-white, standard ArUco polarity
 
