@@ -43,6 +43,47 @@ Two other parts worth knowing about:
   photos off the device. A reasonable later option, as an explicit opt-in, not
   the default.
 
+## Pi Zero-sized alternatives: Radxa Zero 3W and Orange Pi Zero 3W
+
+Worth a look because the Pi Zero 2 W has been sold out for much of 2026 and
+has only 512 MB of RAM, which is tight for OpenCV plus Bluetooth plus speech.
+
+| | Pi Zero 2 W | Radxa Zero 3W | Orange Pi Zero 3W | Orange Pi Zero 2W |
+| --- | --- | --- | --- | --- |
+| SoC | BCM2710, 4× A53 1.0 GHz | Rockchip RK3566, 4× A55 1.6 GHz | Allwinner A733, 2× A76 + A55 cores, 2.0 GHz | Allwinner H618, 4× A53 1.5 GHz |
+| RAM | 512 MB | 1 / 2 / 4 / 8 GB LPDDR4 | 1 to 16 GB LPDDR5 | 1 to 4 GB LPDDR4 |
+| NPU | none | 0.8 TOPS (small CNNs via RKNN, no LLMs) | 3 TOPS (claimed; toolchain new) | none |
+| Storage | microSD | microSD + optional eMMC (survives power cuts better than SD) | microSD + optional eMMC / UFS | microSD + optional eMMC |
+| Camera | 22-pin CSI, Pi camera modules just work via picamera2 | 22-pin 4-lane CSI; only the sensors Radxa lists, Camera Module 3 is not among them | 2× 4-lane CSI; driver stack brand new | no CSI; USB webcam only |
+| Wireless | Wi-Fi 4, BT 4.2 | Wi-Fi 6, BT 5.4 | Wi-Fi 6, BT 5.4 | Wi-Fi 5, BT 5.0 |
+| USB | 1× micro-USB 2.0 OTG | USB 3.0 host + USB 2.0 OTG (Type-C) | USB 3.1 OTG + USB 2.0 (Type-C) | 2× Type-C 2.0 |
+| Price | $15 list, scarce | ~$15 to 35 (1 GB) up to ~$100 (8 GB) depending on region; availability patchy | $25 claimed for 1 GB, realistically $55+ for 4 GB; launched April 2026 | $15 to 30 |
+| Board-read estimate | 0.3 to 0.5 s | 0.15 to 0.25 s | under 0.1 s | 0.25 to 0.4 s |
+| Neural TTS (Piper) | several seconds a sentence | about real time, usable for short phrases | real time, Pi 5 class | slow |
+| Local 1B LLM | no | no | possible on CPU with 8 GB, like a Pi 5 | no |
+| Software maturity | Raspberry Pi OS, picamera2, gpiozero, rpi_ws281x: everything in this repo runs as is | RK3566 is well supported (Radxa OS, Armbian, near-mainline kernel); GPIO via libgpiod or mraa, LED ring via SPI, BLE via BlueZ works | new SoC: vendor kernel, immature camera, ISP and NPU stacks; expect rough edges for a year or more | H618 is reasonably supported by Armbian; no camera path other than USB |
+
+What changes on a non-Raspberry board:
+
+- **Camera:** use a USB UVC webcam with autofocus (a 1080p autofocus module
+  is $20 to 30, a Logitech C920-class webcam $50 to 70) instead of a CSI
+  module. OpenCV reads it the same way everywhere, and the camera driver
+  question disappears. `brain/reader/camera.py` supports both.
+- **LED ring:** drive WS2812 over SPI (`spidev`) rather than the Pi PWM
+  library.
+- **Buttons:** `gpiod` instead of `gpiozero`.
+- **Bluetooth:** `bleak` on BlueZ works on all of them, but test the specific
+  Wi-Fi/BT module early: BLE stability is the one thing this project cannot
+  live without.
+
+Verdict: these compete with the Zero 2 W for the budget or compact build,
+not with the Pi 5 for the main build. **Radxa Zero 3W with 4 GB** is the
+safe pick in that class today: mature kernel, eMMC, eight times the RAM of
+the Pi Zero, and Piper speech becomes usable. **Orange Pi Zero 3W** has Pi 5
+class CPU in a Zero footprint and would be the ideal compact board once its
+software settles; revisit it in 2027 rather than debugging a vendor kernel
+with a child waiting. **Orange Pi Zero 2W** only if price is everything.
+
 ## Recommendation
 
 1. **Build the brain on a Pi 5 with 4 GB.** It costs about $50 more than
@@ -58,8 +99,9 @@ Two other parts worth knowing about:
    design**, so an AI HAT+ 2 can drop in later for a local helper that talks
    to her about her program. Skip the first AI HAT+ (vision-only) and skip
    Coral entirely.
-4. **Keep the Zero 2 W as the documented budget build.** The code is the
-   same; only timings differ. Useful for a second unit or a gift to a friend.
+4. **Keep a documented budget / compact build.** Pi Zero 2 W if you can
+   get one, otherwise Radxa Zero 3W 4 GB with a USB webcam. The code is the
+   same; only timings and the hardware shims differ.
 
 ## What changes in the design docs
 

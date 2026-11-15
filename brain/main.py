@@ -181,11 +181,12 @@ class SimDriver:
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--image", help="use this photo instead of the camera")
+    ap.add_argument("--webcam", type=int, help="use USB webcam N instead of the Pi camera")
     ap.add_argument("--simulate", action="store_true", help="no hub: print what the robot would do")
     ap.add_argument("--clips", help="folder of <key>.wav voice clips")
     args = ap.parse_args(argv)
 
-    camera = Camera(fallback_file=args.image)
+    camera = Camera(fallback_file=args.image, uvc_index=args.webcam)
     if args.simulate:
         driver = SimDriver()
     else:
