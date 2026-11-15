@@ -19,78 +19,13 @@ from brain.language import layout, speech
 from brain.language.vocabulary import default as vocabulary
 from brain.reader.camera import Camera
 from brain.reader.grid import GridError, read_board
+from brain.ui.buttons import Buttons
+from brain.ui.ring import Ring
+from brain.ui.speaker import Speaker
 
 # Where the four stand markers sit, in mm, in whatever frame you like.
 # Only their relative positions matter. Measure once when the stand is built.
 CORNERS_MM = {90: (10.0, 10.0), 91: (270.0, 10.0), 92: (10.0, 270.0), 93: (270.0, 270.0)}
-
-
-class Ring:
-    """16 WS2812 LEDs around the lens. Console fallback prints the colour."""
-    def __init__(self):
-        try:
-            from rpi_ws281x import PixelStrip, Color  # type: ignore
-            self.strip = PixelStrip(16, 18, brightness=60)
-            self.strip.begin()
-            self._c = Color
-        except Exception:
-            self.strip = None
-
-    def show(self, name: str):
-        rgb = {"off": (0, 0, 0), "booting": (40, 0, 80), "ready": (0, 0, 120), "flash": (255, 255, 255),
-               "thinking": (120, 90, 0), "running": (0, 120, 0), "error": (140, 0, 0), "stepping": (120, 120, 0)}[name]
-        if self.strip:
-            for i in range(16):
-                self.strip.setPixelColor(i, self._c(*rgb))
-            self.strip.show()
-        else:
-            print(f"[ring] {name}")
-
-
-class Speaker:
-    """Plays one pre-recorded clip per key from clips/<key>.wav; prints otherwise."""
-    def __init__(self, clips: Path | None = None):
-        self.clips = clips
-
-    def say_keys(self, keys: list[str]):
-        import shutil
-        import subprocess
-        for k in keys:
-            f = (self.clips / f"{k}.wav") if self.clips else None
-            if f and f.exists() and shutil.which("aplay"):
-                subprocess.run(["aplay", "-q", str(f)], check=False)
-            elif k == "pause":
-                time.sleep(0.15)
-            else:
-                print(f"[say] {k}")
-
-    def say(self, sentence: str):
-        print(f"[say] {sentence}")
-
-
-class Buttons:
-    """RUN / STOP / STEP on GPIO; console fallback reads a line: r, s, t, q."""
-    def __init__(self):
-        self.gpio = None
-        try:
-            from gpiozero import Button  # type: ignore
-            self.run, self.stop, self.step = Button(17), Button(27), Button(22)
-            self.gpio = True
-        except Exception:
-            pass
-
-    def wait(self) -> str:
-        if self.gpio:
-            while True:
-                if self.run.is_pressed:
-                    return "run"
-                if self.stop.is_pressed:
-                    return "stop"
-                if self.step.is_pressed:
-                    return "step"
-                time.sleep(0.02)
-        line = input("[buttons] r=RUN s=STOP t=STEP q=quit > ").strip().lower()
-        return {"r": "run", "s": "stop", "t": "step", "q": "quit"}.get(line[:1], "none")
 
 
 class Brain:

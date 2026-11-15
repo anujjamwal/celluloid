@@ -2,13 +2,16 @@
 
 Short records of choices that shape everything downstream. Newest first.
 
-## 2026-11-15 · Brain board: Pi 5 (4 GB), no accelerator, HAT headroom reserved
+## 2026-11-15 · Brain board: Radxa Zero 3W (4 GB) or Pi 5 (4 GB), by priority; no accelerator
 
-Pi 5 over Zero 2 W for boot time, instant reads and a credible path to neural
-speech and voice commands; no NPU because nothing in versions 1 and 2 needs
-one; enclosure leaves room for an AI HAT+ 2 if a local language model is ever
-wanted. Coral ruled out (frozen software, no LLM path). Zero 2 W stays as the
-documented budget build. Details in `08-brain-hardware-options.md`.
+Size and battery power favour the Radxa Zero 3W; an on-board local-AI path
+and zero platform work favour the Pi 5. Both are supported by the code (the
+Radxa route uses a USB webcam, an SPI-driven LED ring and libgpiod buttons).
+Current lean, given that size and power matter: **Radxa Zero 3W 4 GB**,
+confirmed only after the day-one smoke test in `08-brain-hardware-options.md`
+passes (BLE, webcam, ring, buttons, audio). Any local language model runs
+off-board (home server or opt-in cloud), which keeps the brain small. Coral
+ruled out; the first AI HAT+ ruled out; Zero 2 W stays as the budget build.
 
 ## 2026-11-09 · Markers are black-on-white, standard ArUco polarity
 

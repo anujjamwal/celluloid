@@ -136,15 +136,59 @@ class CPU in a Zero footprint and would be the ideal compact board once its
 software settles; revisit it in 2027 rather than debugging a vendor kernel
 with a child waiting. **Orange Pi Zero 2W** only if price is everything.
 
+## Head to head: Pi 5 versus Radxa Zero 3W
+
+Size and power are real differences; "equally capable" is not. Numbers are
+typical, not measured by us yet.
+
+| | Pi 5 (4 GB) | Radxa Zero 3W (4 GB) |
+| --- | --- | --- |
+| Board | 85 × 56 mm, 17 mm tall with the active cooler, 45 g | 65 × 30 mm, 8 mm tall, 15 g |
+| Idle power | ~2.7 W | ~1 W |
+| Working power (our bursts) | 5 to 8 W | 2.5 to 3.5 W |
+| Supply | 5 V / 5 A official; a 5 V / 3 A supply works with USB current capped | 5 V / 2 A; runs from any power bank |
+| CPU | 4× Cortex-A76 at 2.4 GHz | 4× Cortex-A55 at 1.6 GHz: roughly a quarter of the Pi 5 per core, about a Pi 3B+ to Pi 4 overall |
+| RAM | 4 GB | 4 GB |
+| Storage | microSD (NVMe via HAT) | microSD or on-board eMMC |
+| Board read, 2304 px still | < 0.1 s | 0.15 to 0.25 s |
+| Piper neural voice, one sentence | ~0.2 s | 1 to 2 s with a "low" voice, longer with "medium": fine for one sentence, sluggish for a whole program read-back |
+| Voice commands ("stop") | whisper.cpp tiny, comfortable | Vosk small model, workable; whisper too slow |
+| Local 1B language model | a few tokens/s on CPU, more with an AI HAT+ 2 | no |
+| Add-on path | AI HAT+ 2 over PCIe | none (0.8 TOPS NPU, CNNs only) |
+| Camera | any Pi camera module incl. autofocus Module 3 | IMX219 / OV5647 on a pinned kernel, or a USB webcam |
+| Software for this repo | everything runs as is | SPI ring, libgpiod buttons, USB webcam: all supported in the code now; expect an evening or two of distro work |
+| Boot | 12 to 15 s | 15 to 20 s |
+
+What this means for the enclosure: the board is not the biggest thing in the
+box. A 60 mm arcade button, a 45 mm LED ring, a 40 mm speaker and the camera
+arm set the footprint at roughly 120 × 80 mm either way. The Radxa saves depth
+and lets the box run from a power bank; the Pi 5 needs a mains lead and a fan
+slot.
+
+**Decision rule**
+
+- Choose the **Radxa Zero 3W** if: the brain should be small and run from a
+  battery, recorded voice clips are the plan (with Piper for short phrases at
+  most), and any future "AI helper" may live elsewhere: on a home server over
+  Wi-Fi, or in the cloud as an opt-in. For this project's actual workloads it
+  is capable enough.
+- Choose the **Pi 5** if: you want an on-board path to a local language model
+  through the AI HAT+ 2, want neural speech for everything the brain says,
+  or want zero platform work.
+
+The AI question is the real fork. A local model does not have to run inside
+the brain: the brain can stay a small camera-and-buttons box and ask a
+machine elsewhere in the house. That decouples "small and low power" from
+"local AI later", and it is the cheaper way to get a capable model anyway.
+
 ## Recommendation
 
-1. **Build the brain on a Pi 5 with 4 GB.** It costs about $50 more than
-   the Zero 2 W, and in exchange: half the boot time, instant board reads,
-   real-time neural speech if we outgrow the recorded clips, voice commands
-   ("stop!") become feasible, and the enclosure never has to be redesigned.
-   The stand is stationary, so mains power is no loss. Take the 8 GB board
-   (+$20) only if a local language model is a real intention rather than a
-   maybe.
+1. **Pick by the decision rule above.** If small size and low power are the
+   priorities, the Radxa Zero 3W with 4 GB is a sound primary board for this
+   project, with a USB autofocus webcam and local AI, if ever, running
+   off-board. If an on-board AI HAT+ 2 path or zero platform work matters
+   more, the Pi 5 with 4 GB. Either way, run the day-one smoke test below
+   before designing the enclosure around the board.
 2. **No accelerator now.** Version 1 and 2 (sensors, step mode, voice
    feedback) run entirely on the CPU.
 3. **Leave 20 mm of headroom and the GPIO stacking header in the enclosure
@@ -154,6 +198,24 @@ with a child waiting. **Orange Pi Zero 2W** only if price is everything.
 4. **Keep a documented budget / compact build.** Pi Zero 2 W if you can
    get one, otherwise Radxa Zero 3W 4 GB with a USB webcam. The code is the
    same; only timings and the hardware shims differ.
+
+## Day-one smoke test for any non-Raspberry board
+
+Do this before anything else; it covers every platform risk at once.
+
+1. Flash the vendor image the docs recommend; note the kernel version.
+2. `pip install bleak`, run `python -m brain.drivers.pybricks_ble` with the
+   hub interpreter loaded: the hub must beep and drive. Leave it looping for
+   an hour; BLE stability is the one thing we cannot work around.
+3. Plug in the USB webcam, run `python -m brain.main --webcam 0 --simulate`
+   with the paper tiles on the baseplate: it must read the program aloud.
+4. Wire the ring to the SPI MOSI pin and a button to a GPIO line; check the
+   backends `Ring().backend` and `Buttons().backend` report `spidev` and
+   `gpiod`.
+5. Play a wav with `aplay` through the I2S amplifier.
+
+If all five pass in one evening, the board is in. If BLE or the webcam fail,
+stop and take the Pi 5.
 
 ## What changes in the design docs
 

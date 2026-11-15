@@ -27,12 +27,12 @@ Three layers that can be developed and tested independently:
 
 | Part | Choice | Why |
 | --- | --- | --- |
-| Compute | Raspberry Pi 5, 4 GB (budget build: Pi Zero 2 W) | Pi 5: instant board reads, 15 s boot, real-time neural speech and voice commands later, room for an AI HAT+ 2. Zero 2 W works for version 1 at a quarter of the price but is slow for anything beyond recorded clips. See `08-brain-hardware-options.md`. No accelerator in either build. |
-| Camera | Raspberry Pi Camera Module 3 (wide) | autofocus, 12 MP, wide lens covers a 256 mm baseplate from ~300 mm height |
-| Lights | 16-LED RGB ring (WS2812) around the lens | status display and even illumination of the blocks |
+| Compute | Radxa Zero 3W 4 GB (small, battery-friendly) or Raspberry Pi 5 4 GB (on-board AI path, zero platform work) | Both run this code. See the decision rule and smoke test in `08-brain-hardware-options.md`. No accelerator in either build. |
+| Camera | Pi 5: Camera Module 3 (wide). Radxa: a USB autofocus webcam, 1080p or better | autofocus matters at 30 cm; a USB camera works on every board through the same OpenCV path |
+| Lights | 16-LED RGB ring (WS2812) around the lens, driven by PWM on a Pi or SPI elsewhere | status display and even illumination of the blocks |
 | Sound | I2S amplifier (MAX98357A) + 3 W speaker | voice clips and effects; the Zero has no audio jack |
 | Buttons | 3 arcade buttons: RUN (green, 60 mm), STOP (red), STEP (yellow) + power | big, satisfying, unambiguous |
-| Power | official 27 W USB-C supply (Pi 5) or a power bank (Zero 2 W) | stationary unit, no battery management to design |
+| Power | power bank or 5 V / 2 A supply (Radxa); 27 W USB-C supply (Pi 5) | no battery management to design either way |
 | Storage | 16 GB microSD, read-only root once stable | survives being switched off without shutdown |
 
 Mechanical: a 3D-printed stand clamps to one edge of the baseplate and holds
