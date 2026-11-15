@@ -2,6 +2,14 @@
 
 Short records of choices that shape everything downstream. Newest first.
 
+## 2026-11-15 · Brain board: Pi 5 (4 GB), no accelerator, HAT headroom reserved
+
+Pi 5 over Zero 2 W for boot time, instant reads and a credible path to neural
+speech and voice commands; no NPU because nothing in versions 1 and 2 needs
+one; enclosure leaves room for an AI HAT+ 2 if a local language model is ever
+wanted. Coral ruled out (frozen software, no LLM path). Zero 2 W stays as the
+documented budget build. Details in `08-brain-hardware-options.md`.
+
 ## 2026-11-09 · Markers are black-on-white, standard ArUco polarity
 
 A white field with black cells on every block, whatever the body colour. Keeps
