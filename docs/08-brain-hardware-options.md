@@ -76,7 +76,59 @@ What changes on a non-Raspberry board:
   Wi-Fi/BT module early: BLE stability is the one thing this project cannot
   live without.
 
-Verdict: these compete with the Zero 2 W for the budget or compact build,
+### Checked: the Radxa Zero 3W camera path (November 2026)
+
+- **Supported sensors** per Radxa's docs: Raspberry Pi Camera V1.3 (OV5647),
+  Raspberry Pi Camera V2 (IMX219) and Radxa's own Camera 8M 219 (IMX219).
+  Not supported: Camera Module 3 (IMX708) or any autofocus module.
+- **How it works:** enable the camera overlay with `rsetup`, reboot, then the
+  camera is a plain V4L2 device at `/dev/video0` delivering NV12 (Radxa's
+  example captures 1920×1080 with GStreamer). OpenCV's `VideoCapture` reads
+  that directly, so `brain/reader/camera.py` works unchanged through its UVC
+  path with `--webcam 0`. ArUco does not care about the ISP.
+- **Community record is mixed.** On the forum the 8M camera worked on
+  Radxa's Debian image only with kernel 5.10.160-26; a later 5.10.160-38 and
+  Armbian's 6.1 vendor kernel did not. Several owners found the CSI connector
+  on early boards assembled inverted and fixed it by flipping the cable or the
+  connector latch. Radxa's IMX219 cable pinout also differs from the Pi's, so
+  use Radxa's cable, not a Pi one.
+- **Optics:** IMX219 modules are fixed focus set around 1 m. At the 30 to
+  40 cm stand height the lens must be twisted a quarter turn (the Pi V2
+  module allows this) or the image is soft. 3280 px across 270 mm gives
+  12 px/mm, more than enough.
+- **Verdict:** workable, with a weekend of risk: pin the kernel Radxa's docs
+  recommend, buy Radxa's 8M camera and cable, test on day one. A USB
+  autofocus webcam removes all of that and costs the same.
+
+### Checked: the Allwinner A733 NPU (Orange Pi Zero 3W)
+
+- **What it is:** a Vivante VIP9000-series NPU rated 3 TOPS INT8. It is a
+  real, usable unit on Linux: Radxa's Cubie A7 boards (same SoC) document the
+  flow, with YOLOv8n at about 79 fps and YOLO11s-pose at about 31 fps at
+  640×640.
+- **How you use it:** models are converted on an x86 PC inside a vendor
+  Docker image (ACUITY toolkit, exported to a "NBG" binary), then run on the
+  board through the VIPLite / awnn C runtime. Python access is through
+  wrapping the C demo. Compared with Hailo's or even Rockchip's RKNN tooling
+  this is the least friendly flow of the three.
+- **On the Orange Pi Zero 3W specifically:** reviewers report that Orange
+  Pi's stock images ship without GPU and video-engine userspace, image
+  download links were empty at launch, and mainline kernel support for the
+  A733 is still incomplete. Nobody has published an NPU or camera result on
+  this board yet; the working examples are on Radxa's A733 boards.
+- **Does it help this project?** No, and that is a property of the project
+  rather than the chip. Reading markers is not a neural network, so an NPU
+  cannot touch it. The one neural task on the roadmap, a markerless icon
+  classifier, is a tiny model the A733's A76 cores run in a few
+  milliseconds; the NPU would save power, not time. Language and
+  vision-language models are beyond 3 TOPS without on-chip memory. The
+  A733's attraction here is its CPU, not its NPU.
+- **Verdict:** a promising compact board whose software is six months old.
+  If you want it, start from Radxa's Cubie A7Z documentation and images,
+  which are the most complete A733 stack, and expect to do kernel and
+  userspace work that Raspberry Pi owners never see.
+
+Verdict on the class: these compete with the Zero 2 W for the budget or compact build,
 not with the Pi 5 for the main build. **Radxa Zero 3W with 4 GB** is the
 safe pick in that class today: mature kernel, eMMC, eight times the RAM of
 the Pi Zero, and Piper speech becomes usable. **Orange Pi Zero 3W** has Pi 5
